@@ -93,7 +93,7 @@
     <div class="view intro-2" id="background"
          style="background: url('/img/wonderful.png')no-repeat center center;
            background-size: cover;
-           background-attachment: fixed;">
+           background-attachment: scroll;">
       <div class="full-bg-img">
         <div class="mask rgba-black-light flex-center">
           <div class="container text-center white-text fadeInUp">
@@ -290,11 +290,11 @@ More info: Deployment
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "&nbsp;",
+        "hello&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,
-      loop: false,
+      loop: true,
     });
     typed.stop();
     $(document).ready(function () {
