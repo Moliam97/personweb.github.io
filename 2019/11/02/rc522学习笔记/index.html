@@ -138,8 +138,619 @@
       <div class="py-5 z-depth-3" id="board">
         <div class="post-content mx-auto">
           <div class="markdown-body">
-            <h1 id="IC卡和ID卡"><a href="#IC卡和ID卡" class="headerlink" title="IC卡和ID卡"></a>IC卡和ID卡</h1><p><a href="http://www.jhreader.com/wenzhang/wenzhang_021.asp" target="_blank" rel="noopener">IC与ID卡</a> </p>
+            <h1 id="IC卡和ID卡"><a href="#IC卡和ID卡" class="headerlink" title="IC卡和ID卡"></a>IC卡和ID卡</h1><h2 id="IC与ID卡的概念"><a href="#IC与ID卡的概念" class="headerlink" title="IC与ID卡的概念"></a>IC与ID卡的概念</h2><p><a href="http://www.jhreader.com/wenzhang/wenzhang_021.asp" target="_blank" rel="noopener">IC与ID卡</a> </p>
 <p>本次调试采用S50卡片，为4K存储M1的IC卡。</p>
+<h2 id="IC卡的读写控制"><a href="#IC卡的读写控制" class="headerlink" title="IC卡的读写控制"></a>IC卡的读写控制</h2><p><a href="https://blog.csdn.net/lynnlbf/article/details/52587486" target="_blank" rel="noopener">链接1</a></p>
+<p><a href="https://blog.csdn.net/lynnlbf/article/details/52588795" target="_blank" rel="noopener">链接2</a></p>
+<h1 id="RF522"><a href="#RF522" class="headerlink" title="RF522"></a>RF522</h1><p>RF522为恩智浦退出的一款芯片，能够与IC卡进行无线通讯，读取数据，写入数据的芯片，本次使用波特率为9600的串口与RF522进行通讯，对卡片进行配置，读写。</p>
+<h2 id="休眠："><a href="#休眠：" class="headerlink" title="休眠："></a>休眠：</h2><p>当RC522配置卡片进入休眠状态时，IC卡若一直在附近，则会一直处于休眠状态，当离开时在接近时就不属于休眠状态了。RC522可以配置卡片为休眠状态，RC522寻找附近卡片时，可以选择是否查找处于休眠状态下的卡片。这样就可以实现卡片的防冲撞。</p>
+<h2 id="RC522实验代码如下"><a href="#RC522实验代码如下" class="headerlink" title="RC522实验代码如下"></a>RC522实验代码如下</h2><pre><code class="c">#include &quot;zz_include.h&quot;
+
+#ifdef ZZ_RC522_MODULE
+#include &quot;zz_rc522_config.h&quot;
+
+tZZ_RC522_INFO_STRUCT tzz_rc522_info = {0};
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart-&gt;Instance == USART1)
+     {
+       vZZ_RC522_MODULE_Rec_Data();
+       vZZ_RC522_Turn_On_Rec_IT();
+     }
+}
+
+static void vZZ_RC522_delay_ns(INT8U ns)
+{
+    INT8U i;
+    for(i=0;i&lt;ns;i++){
+        __nop();
+        __nop();
+        __nop();
+    }
+}
+
+/**
+*@brief   : 打开中断
+*/
+void vZZ_RC522_Turn_On_Rec_IT(void)
+{
+    HAL_UART_Receive_IT(&amp;ZZ_RC522_MODULE_USART, &amp;tzz_rc522_info.acHardware_Buffer, 1);
+}
+
+/**
+*@brief   : 将串口收到的数据放入队列
+*/
+void vZZ_RC522_MODULE_Rec_Data(void)
+{
+    MyKfifo_In(&amp;tzz_rc522_info.tRecv_fifo,&amp;tzz_rc522_info.acHardware_Buffer,1);
+}
+
+/**
+*@brief   : 读取rc522数据
+*@param   : Address 寄存器地址
+*@retval  : ucResult  读取到的值
+*/
+static INT8U u8ZZ_RC522_ReadRawRC(INT8U    Address)
+{
+    INT8U   ucAddr;
+    INT8U   ucResult = 0;
+    INT16U  u16count = 0;
+
+    ucAddr = (Address &amp; 0x3F) | 0x80;
+
+    HAL_UART_Transmit(&amp;ZZ_RC522_MODULE_USART, &amp;ucAddr, 1, 0x10);
+    //等待读出的数据放到队列里，返回值为队列长度
+    while((MyKfifo_Out(&amp;tzz_rc522_info.tRecv_fifo, &amp;ucResult, 1) == 0) &amp;&amp; (u16count++ &lt; 1000))
+        ;
+    if(u16count &gt;= 1000){
+        LOG(LOG_ERROR,&quot;time out&quot;);
+        while(1);
+    }
+     return ucResult;
+}
+
+/**
+*@brief   : 读取rc522数据
+*@param   : Address 寄存器地址
+*@retval  : ucResult  读取到的值
+*/
+static void vZZ_RC522_WriteRawRC(INT8U   Address, INT8U   value)
+{  
+    INT8U   ucAddr;
+    INT8U   ucResult;
+    INT16U  u16count = 0;
+
+    ucAddr = (Address)&amp; 0x3F;
+    MyKfifo_Out(&amp;tzz_rc522_info.tRecv_fifo, &amp;ucResult, ZZ_RC522_USART_REC_MAX_LENGTH);
+    HAL_UART_Transmit(&amp;ZZ_RC522_MODULE_USART, &amp;ucAddr, 1, 0xffffffff);//写寄存器
+
+    while((MyKfifo_Out(&amp;tzz_rc522_info.tRecv_fifo, &amp;ucResult, 1) == 0) &amp;&amp; (u16count++ &lt; 1000));
+    if(u16count &gt;= 1000){
+        LOG(LOG_ERROR,&quot;time out&quot;);
+        while(1);
+    }
+    if(ucResult != Address){
+        LOG(LOG_ERROR, &quot;write ruturn error,return value %d\r\n&quot;,ucResult);
+        while(1);
+    }
+
+    HAL_UART_Transmit(&amp;ZZ_RC522_MODULE_USART, &amp;value, 1, 0xffffffff);//写地址
+}
+
+/**
+*@brief   : 置RC522寄存器位
+*@param   : reg 寄存器地址,mask 置位值
+*@retval  : 无
+*/
+static void vZZ_RC522_SetBitMask(INT8U   reg,INT8U   mask)  
+{
+    char   tmp = 0x0;
+    tmp = u8ZZ_RC522_ReadRawRC(reg);
+    vZZ_RC522_WriteRawRC(reg,tmp | mask);  // set bit mask
+}
+
+/**
+*@brief   : 清RC522寄存器位
+*@param   : reg 寄存器地址,mask 清位值
+*@retval  : 无
+*/
+static void vZZ_RC522_ClearBitMask(INT8U   reg,INT8U   mask)  
+{
+    char   tmp = 0x0;
+    tmp = u8ZZ_RC522_ReadRawRC(reg);
+    vZZ_RC522_WriteRawRC(reg, tmp &amp; ~mask);  // clear bit mask
+} 
+
+/**
+*@brief   : 开启天线
+*@param   : 无
+*@retval  : 无
+*///注：每次启动或关闭天险发射之间应至少有1ms的间隔
+void vZZ_RC522_PcdAntennaOn(void)
+{
+    INT8U   i;
+    i = u8ZZ_RC522_ReadRawRC(TxControlReg);
+    if (!(i &amp; 0x03))
+    {
+        vZZ_RC522_SetBitMask(TxControlReg, 0x03);
+    }
+}
+
+/**
+*@brief   : 关闭天线
+*@param   : 无
+*@retval  : 无
+*/
+void vZZ_RC522_PcdAntennaOff(void)
+{
+    vZZ_RC522_ClearBitMask(TxControlReg, 0x03);
+}
+
+
+/**
+*@brief   : 复位pcd
+*@param   : 无
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_PcdReset(void)
+{
+    SET_RC522RST;
+    vZZ_RC522_delay_ns(10);
+
+    CLR_RC522RST;
+    vZZ_RC522_delay_ns(10);
+
+    SET_RC522RST;
+    vZZ_RC522_delay_ns(10);
+
+    //vZZ_RC522_WriteRawRC(CommandReg,PCD_RESETPHASE);
+    //vZZ_RC522_WriteRawRC(CommandReg,PCD_RESETPHASE);
+    // delay_ns(10);
+    HAL_Delay(5);
+        //
+    vZZ_RC522_WriteRawRC(ModeReg,0x3D);         //定义发送和接收常用模式 和Mifare卡通讯，CRC初始值0x6363
+    vZZ_RC522_WriteRawRC(TReloadRegL,30);           //16位定时器低位     
+    vZZ_RC522_WriteRawRC(TReloadRegH,0);             //16位定时器高位
+    vZZ_RC522_WriteRawRC(TModeReg,0x8D); //定义内部定时器的设置
+    vZZ_RC522_WriteRawRC(TPrescalerReg,0x3E);     //设置定时器分频系数
+
+    vZZ_RC522_WriteRawRC(TxAutoReg,0x40);//调制发送信号为100%ASK    
+
+    return ZZ_SUCCESS;
+}
+
+/**
+*@brief   : 选择命令字
+*@param   : Command命令 irqEn中断使能 waitFor等待时间
+*@retval  : ZZ_SUCCESS 成功
+*/
+static void vZZ_RC522_Select_Command(INT8U Command,INT8U *irqEn,INT8U *waitFor)
+{
+    switch (Command)
+    {
+        case PCD_AUTHENT:   //校验密钥
+            *irqEn   = 0x12;
+            *waitFor = 0x10;
+            break;
+        case PCD_TRANSCEIVE://收发模式
+            *irqEn   = 0x77;
+            *waitFor = 0x30;
+            break;
+        default:    break;
+    }
+}
+
+/**
+*@brief   : 通过RC522和ISO14443卡通讯
+*@param   : Command RC522命令字 pIn通过RC522发送到卡片的数据 InLenByte发送数据的字节长度
+*@param      : pOut 接收到的卡片返回数据 pOutLenBit 返回数据的位长度
+*@retval  : ZZ_SUCCESS 成功
+*/
+static INT8S s8ZZ_RC522_PcdComMF522(INT8U Command, INT8U *pIn, INT8U InLenByte,INT8U *pOut , INT8U *pOutLenBit)
+{
+    INT8S   status  = ZZ_FALSE;
+    INT8U   irqEn   = 0x00;
+    INT8U   waitFor = 0x00;
+    INT8U   lastBits;
+    INT8U   n;
+    INT16U   i;
+    vZZ_RC522_Select_Command(Command,&amp;irqEn,&amp;waitFor);
+
+    vZZ_RC522_WriteRawRC(ComIEnReg,irqEn|0x80);
+    vZZ_RC522_ClearBitMask(ComIrqReg,0x80);    //清所有中断位
+    vZZ_RC522_WriteRawRC(CommandReg,PCD_IDLE);
+    vZZ_RC522_SetBitMask(FIFOLevelReg,0x80);         //清FIFO缓存，以防影响之后读取数据
+
+    for (i=0; i&lt;InLenByte; i++){
+        vZZ_RC522_WriteRawRC(FIFODataReg, pIn [i]);//将需要发送的数据写进FIFO
+    }
+    vZZ_RC522_WriteRawRC(CommandReg, Command);      
+
+    if (Command == PCD_TRANSCEIVE){
+        vZZ_RC522_SetBitMask(BitFramingReg,0x80);
+    }     //若是为收发模式，置位发送位开始传送
+
+    i = 600;//根据时钟频率调整，操作M1卡最大等待时间25ms
+    do 
+    {
+        n = u8ZZ_RC522_ReadRawRC(ComIrqReg);//是否将数据发送完毕
+        i--;
+    }
+    while ((i != 0) &amp;&amp; !(n &amp; 0x01) &amp;&amp; !(n &amp; waitFor));
+    //有超过25ms左右，或者RC522中的定时器计数完毕，或者没有检测到有效数据流继续循环
+
+    vZZ_RC522_ClearBitMask(BitFramingReg,0x80);//清除开始发送位
+
+    if (i != 0){   
+
+        if(u8ZZ_RC522_ReadRawRC(ErrorReg) &amp; 0x1B){//有错误产生
+            status = ZZ_FALSE;
+            goto end;
+        }
+
+        status = ZZ_SUCCESS;
+        if (n &amp; irqEn &amp; 0x01){
+            status = ZZ_FALSE;
+        }//定时器计数完毕，错误
+
+        if(Command == PCD_TRANSCEIVE){
+            n = u8ZZ_RC522_ReadRawRC(FIFOLevelReg);//FIFO中的字节数
+            lastBits = u8ZZ_RC522_ReadRawRC(ControlReg) &amp; 0x07;//最后一个字节的有效位数
+            //求出有效数据位数
+            if (lastBits)
+                *pOutLenBit = (n-1)*8 + lastBits; //获取有效位数据 //最后一个字节有无效数据位的时候，需要排除
+            else
+                *pOutLenBit = n*8; //所以采用bit计算
+            //整理接收到的数据字节数
+            if (n == 0)
+                n = 1;
+            if (n &gt; MAXRLEN)
+                n = MAXRLEN;
+
+            for (i=0; i&lt;n; i++)
+                pOut [i] = u8ZZ_RC522_ReadRawRC(FIFODataReg);//printf(&quot;%0x&quot;,pOut [i] ); //读缓冲区数据
+            }
+    }
+end:
+    vZZ_RC522_SetBitMask(ControlReg,0x80);           // 关闭定时器
+    vZZ_RC522_WriteRawRC(CommandReg,PCD_IDLE);     //改为空闲状态，没有进行数据传输
+    return status;
+}
+
+
+/**
+*@brief   : 寻卡
+*@param   : req_code寻卡方式 
+                0x52 = 寻感应区内所有符合14443A标准的卡
+                0x26 = 寻未进入休眠状态的卡
+*@param      : pTagType卡片类型
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_PcdRequest(INT8U req_code,INT8U *pTagType)
+{
+    INT8S   status;  
+    INT8U   unLen;
+    INT8U   ucComMF522SendBuf[MAXRLEN]; //发送的数据
+    INT8U   ucComMF522ReceBuf[MAXRLEN]; //接收的数据
+
+    vZZ_RC522_ClearBitMask(Status2Reg,0x08);
+    vZZ_RC522_WriteRawRC(BitFramingReg,0x07);
+    vZZ_RC522_SetBitMask(TxControlReg,0x03);
+
+    ucComMF522SendBuf[0] = req_code;
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522SendBuf,1,ucComMF522ReceBuf,&amp;unLen);
+
+    if ((status == ZZ_SUCCESS) &amp;&amp; (unLen == 0x10)){    
+        *pTagType     = ucComMF522ReceBuf[0];
+        *(pTagType+1) = ucComMF522ReceBuf[1];
+        tzz_rc522_info.tzz_card_info.TagType = (INT16U)(*pTagType) &lt;&lt; 8 | *(pTagType+1);
+        LOG(LOG_DEBUG,&quot;Tagtype:%d&quot;,tzz_rc522_info.tzz_card_info.TagType);
+    }
+    else
+        status = ZZ_FALSE;
+
+    return status;
+}
+
+/**
+*@brief   : 防冲撞
+*@param   : pSnr 卡片序列号 
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_PcdAnticoll(INT8U *pSnr)
+{
+    INT8S   status;
+    INT8U   i,snr_check=0;
+    INT8U   unLen;
+    INT8U   ucComMF522SendBuf[MAXRLEN]; //发送的数据
+    INT8U   ucComMF522ReceBuf[MAXRLEN]; //接收的数据
+
+    vZZ_RC522_ClearBitMask(Status2Reg,0x08);
+    vZZ_RC522_WriteRawRC(BitFramingReg,0x00);
+    vZZ_RC522_ClearBitMask(CollReg,0x80);
+
+    ucComMF522SendBuf[0] = PICC_ANTICOLL1;
+    ucComMF522SendBuf[1] = 0x20;
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522SendBuf,2,ucComMF522ReceBuf,&amp;unLen);
+
+    if (status == ZZ_SUCCESS){
+        for (i=0; i&lt;4; i++){   
+            *(pSnr+i)  = ucComMF522ReceBuf[i];
+            tzz_rc522_info.tzz_card_info.TagID[i] = ucComMF522ReceBuf[i];
+            snr_check ^= ucComMF522ReceBuf[i];
+        }
+        if (snr_check != ucComMF522ReceBuf[i])
+            status = ZZ_FALSE;    
+    }
+
+    vZZ_RC522_SetBitMask(CollReg,0x80);
+    return status;
+}
+
+/**
+*@brief   : 计算CRC
+*@param   : pIn 计算值  len 计算长度 pOut计算结果
+*@retval  : 无
+*/
+static void vZZ_RC522_CalulateCRC(INT8U *pIn ,INT8U   len,INT8U *pOut )
+{
+    INT8U   i,n;
+    vZZ_RC522_ClearBitMask(DivIrqReg,0x04);
+    vZZ_RC522_WriteRawRC(CommandReg,PCD_IDLE);
+    vZZ_RC522_SetBitMask(FIFOLevelReg,0x80);
+    for (i=0; i&lt;len; i++){
+        vZZ_RC522_WriteRawRC(FIFODataReg, *(pIn +i));
+    }
+    vZZ_RC522_WriteRawRC(CommandReg, PCD_CALCCRC);
+    i = 0xFF;
+    do {
+        n = u8ZZ_RC522_ReadRawRC(DivIrqReg);
+        i--;
+    }
+    while ((i!=0) &amp;&amp; !(n&amp;0x04));
+    pOut [0] = u8ZZ_RC522_ReadRawRC(CRCResultRegL);
+    pOut [1] = u8ZZ_RC522_ReadRawRC(CRCResultRegM);
+}
+
+
+/**
+*@brief   : 选定卡片
+*@param   : pSnr 卡片序列号 
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_PcdSelect(INT8U *pSnr)
+{
+    INT8S   status;
+    INT8U   i;
+    INT8U   unLen;
+    INT8U   ucComMF522SendBuf[MAXRLEN]; //发送的数据
+    INT8U   ucComMF522ReceBuf[MAXRLEN]; //接收的数据
+
+    ucComMF522SendBuf[0] = PICC_ANTICOLL1;
+    ucComMF522SendBuf[1] = 0x70;
+    ucComMF522SendBuf[9] = 0;
+    for (i=0; i&lt;4; i++)
+    {
+        ucComMF522SendBuf[i+2] = *(pSnr+i);
+        ucComMF522SendBuf[6]  ^= *(pSnr+i);
+    }
+    vZZ_RC522_CalulateCRC(ucComMF522SendBuf,7,&amp;ucComMF522SendBuf[7]);
+
+    vZZ_RC522_ClearBitMask(Status2Reg,0x08);
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522SendBuf,9,ucComMF522ReceBuf,&amp;unLen);
+
+    if ((status == ZZ_SUCCESS) &amp;&amp; (unLen == 0x18))
+        status = ZZ_SUCCESS;
+    else
+        status = ZZ_FALSE;
+
+    return status;
+}
+
+/**
+*@brief   : 读取M1卡一块数据
+*@param   : addr：块地址
+            p：读出的数据，16字节
+*@retval  : ZZ_SUCCESS 成功
+*/
+static INT8S s8ZZ_RC522_PcdRead(INT8U addr,INT8U *p )
+{
+    INT8S   status;
+    INT8U   unLen;
+    INT8U   i;
+    INT8U   ucComMF522SendBuf[MAXRLEN]; //发送的数据
+    INT8U   ucComMF522ReceBuf[MAXRLEN]; //接收的数据
+
+    ucComMF522SendBuf[0] = PICC_READ;
+    ucComMF522SendBuf[1] = addr;
+    vZZ_RC522_CalulateCRC(ucComMF522SendBuf,2,&amp;ucComMF522SendBuf[2]);
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522SendBuf,4,ucComMF522ReceBuf,&amp;unLen);
+    if ((status == ZZ_SUCCESS) &amp;&amp; (unLen == 0x90)){
+        for (i=0; i&lt;16; i++){
+            *(p +i) = ucComMF522ReceBuf[i];
+        }
+    }
+    else
+        status = ZZ_FALSE;
+
+    return status;
+}
+
+/**
+*@brief   : 写数据到M1卡一块
+*@param   : addr：块地址
+            p：写入的数据，16字节
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_PcdWrite(INT8U addr,INT8U *p )
+{
+    INT8S   status;
+    INT8U   unLen;
+    INT8U   i;
+    INT8U   ucComMF522SendBuf[MAXRLEN]; //发送的数据
+    INT8U   ucComMF522ReceBuf1[MAXRLEN]; //第一次接收的数据
+    INT8U   ucComMF522ReceBuf2[MAXRLEN]; //第二次接收的数据
+
+    ucComMF522SendBuf[0] = PICC_WRITE;
+    ucComMF522SendBuf[1] = addr;
+    vZZ_RC522_CalulateCRC(ucComMF522SendBuf,2,&amp;ucComMF522SendBuf[2]);
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522SendBuf,4,ucComMF522ReceBuf1,&amp;unLen);
+
+    if ((status != ZZ_SUCCESS) || (unLen != 4) || ((ucComMF522ReceBuf1[0] &amp; 0x0F) != 0x0A))
+        status = ZZ_FALSE;
+
+    if (status == ZZ_SUCCESS){
+        for (i=0; i&lt;16; i++){    
+            ucComMF522ReceBuf1[i] = *(p +i);   
+        }
+        vZZ_RC522_CalulateCRC(ucComMF522ReceBuf1,16,&amp;ucComMF522ReceBuf1[16]);
+
+        status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522ReceBuf1,18,ucComMF522ReceBuf2,&amp;unLen);
+        if ((status != ZZ_SUCCESS) || (unLen != 4) || ((ucComMF522ReceBuf2[0] &amp; 0x0F) != 0x0A))
+            status = ZZ_FALSE;
+    }
+
+    return status;
+}
+
+
+/**
+*@brief   : 命令卡片进入休眠状态
+*@param   : 无 
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_PcdHalt(void)
+{
+    INT8S   status;
+    INT8U   unLen;
+    INT8U   ucComMF522SendBuf[MAXRLEN]; //发送的数据
+    INT8U   ucComMF522ReceBuf[MAXRLEN]; //接收的数据
+
+    ucComMF522SendBuf[0] = PICC_HALT;
+    ucComMF522SendBuf[1] = 0;
+    vZZ_RC522_CalulateCRC(ucComMF522SendBuf,2,&amp;ucComMF522SendBuf[2]);
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_TRANSCEIVE,ucComMF522SendBuf,4,ucComMF522ReceBuf,&amp;unLen);
+    if(status == ZZ_FALSE)
+        return ZZ_FALSE;
+    return ZZ_SUCCESS;
+}
+
+/**
+*@brief   :  验证卡片密码
+*@param   :  auth_mode[IN]: 密码验证模式
+                 0x60 = 验证A密钥
+                 0x61 = 验证B密钥 
+             addr[IN]：块地址
+             pKey[IN]：密码
+             pSnr[IN]：卡片序列号，4字节
+*@retval  : ZZ_SUCCESS 成功
+*/             
+INT8S s8ZZ_RC522_PcdAuthState(INT8U auth_mode,INT8U addr,INT8U * pKey,INT8U * pSnr)
+{
+    INT8S   status;
+    INT8U   unLen;
+    INT8U     ucComMF522Buf[MAXRLEN]; 
+
+    ucComMF522Buf[0] = auth_mode;
+    ucComMF522Buf[1] = addr;
+
+    memcpy(&amp;ucComMF522Buf[2], pKey, 6); 
+    memcpy(&amp;ucComMF522Buf[8], pSnr, 7); 
+
+    status = s8ZZ_RC522_PcdComMF522(PCD_AUTHENT,ucComMF522Buf,12,ucComMF522Buf,&amp;unLen);
+    if ((status != ZZ_SUCCESS) || (!(u8ZZ_RC522_ReadRawRC(Status2Reg) &amp; 0x08)))
+        status = ZZ_FALSE;
+
+    return status;
+}
+
+/**
+*@brief   : 测试流程
+*@param   : 无 
+*@retval  : ZZ_SUCCESS 成功
+*/
+void vZZ_RC522_ctrlprocess(void)
+{
+    INT8S status;
+    INT8U u8i;
+    INT8U RevBuffer[64];
+    INT8U Card_ID[4];
+    INT8U PassWd1[6]={0xff,0xff,0xff,0xff,0xff,0xff};
+    //INT8U PassWd2[6]={0,0,0,0,0,0};
+    //INT8U PassWd3[6]={1,2,3,4,5,6};
+    INT8U Read_Data1[16];
+    INT8U WriteData[16]={0,0,0,0,0,0,0xEE,0x17,0x81,0x69,0xff,0xff,0xff,0xff,0xff,0xff};
+
+    s8ZZ_RC522_PcdReset();//复位RC522
+    status = s8ZZ_RC522_PcdRequest(PICC_REQIDL,&amp;RevBuffer[0]);//寻天线区内未进入休眠状态的卡，返回卡片类型 2字节
+    if(status != ZZ_SUCCESS)
+        return ;
+
+    status = s8ZZ_RC522_PcdAnticoll(Card_ID);//防冲撞，返回卡的序列号 4字节
+    if(status != ZZ_SUCCESS) 
+        return ;
+
+    status = s8ZZ_RC522_PcdSelect(Card_ID);//选卡
+    if(status != ZZ_SUCCESS) 
+        return ;
+    LOG(LOG_DEBUG,&quot;Select Card&quot;);
+    //16 / 4 = 4 余 0  因此为第4扇区第0块
+    status = s8ZZ_RC522_PcdAuthState(PICC_AUTHENT1B,16,PassWd1,Card_ID);//验证密匙
+    if(status != ZZ_SUCCESS) 
+        return ;
+
+    status = s8ZZ_RC522_PcdWrite(16,&amp;WriteData[0]);//把WriteData[]数组中的数据写到M1卡某一块中
+    if(status != ZZ_SUCCESS) 
+        return ;
+
+    LOG(LOG_DEBUG,&quot;WriteData ok&quot;); 
+
+    status = s8ZZ_RC522_PcdAuthState(PICC_AUTHENT1B,16,PassWd1,Card_ID);//验证密匙
+    if(status != ZZ_SUCCESS)  
+        return ;
+
+    status = s8ZZ_RC522_PcdRead(16,Read_Data1);//从M1卡某一块读取到的数据存放在Read_Data[]数组中
+    if(status != ZZ_SUCCESS)
+        return ;
+
+    for(u8i=0;u8i&lt;16;u8i++)
+        printf(&quot;%c&quot;,Read_Data1[u8i]);
+
+    s8ZZ_RC522_PcdHalt();//命令卡片进入休眠状态
+
+}
+
+/**
+*@brief   : 初始化RC522用到的队列，打开串口中断
+*@param   : 无 
+*@retval  : ZZ_SUCCESS 成功
+*/
+INT8S s8ZZ_RC522_Module_Init(void)
+{
+
+    memset(&amp;tzz_rc522_info, 0, sizeof(tzz_rc522_info));
+
+    tzz_rc522_info.tRecv_fifo.buffer = tzz_rc522_info.tRecv_Buff;
+    tzz_rc522_info.tRecv_fifo = *MyKfifo_Malloc(ZZ_RC522_USART_REC_MAX_LENGTH);
+
+    HAL_UART_Receive_IT(&amp;ZZ_RC522_MODULE_USART, &amp;tzz_rc522_info.acHardware_Buffer, 1);
+
+    return ZZ_SUCCESS;
+}
+#endif</code></pre>
+<h2 id="主函数代码如下"><a href="#主函数代码如下" class="headerlink" title="主函数代码如下"></a>主函数代码如下</h2><pre><code class="C">  s8ZZ_RC522_Module_Init();//初始化
+  while (1)
+  {
+        vZZ_RC522_ctrlprocess();//检测到卡时读写第四扇区第0块的流程
+        HAL_Delay(1000);//延时1s
+  }</code></pre>
 
             <hr>
           </div>

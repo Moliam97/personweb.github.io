@@ -155,6 +155,8 @@
 读取密码测试1，读取空白卡第0扇区数据，使用密码ff,ff,ff,ff,ff,ff验证A，B密码读取数据
 现象：数据为0,0,0,0,0,0,ff,07,80,69,ff,ff,ff,ff,ff,ff
 结论：密码A不可被读取，但是可以正常使用，默认A,B密码为ff,ff,ff,ff,ff,ff
+交通银行IC卡测试结论:1，卡片类型，S50卡
+2，卡片密码从未进行修改，AB均为默认密码，卡内扇区均无任何数据。
 </div>
         </div>
       </a>
@@ -185,9 +187,22 @@
           
         
         <div class="index-excerpt" >
-          <div class="index-text mb-1">IC卡和ID卡IC与ID卡 
+          <div class="index-text mb-1">IC卡和ID卡IC与ID卡的概念IC与ID卡 
 本次调试采用S50卡片，为4K存储M1的IC卡。
-</div>
+IC卡的读写控制链接1
+链接2
+RF522RF522为恩智浦退出的一款芯片，能够与IC卡进行无线通讯，读取数据，写入数据的芯片，本次使用波特率为9600的串口与RF522进行通讯，对卡片进行配置，读写。
+休眠：当RC522配置卡片进入休眠状态时，IC卡若一直在附近，则会一直处于休眠状态，当离开时在接近时就不属于休眠状态了。RC522可以配置卡片为休眠状态，RC522寻找附近卡片时，可以选择是否查找处于休眠状态下的卡片。这样就可以实现卡片的防冲撞。
+RC522实验代码如下#include &quot;zz_include.h&quot;
+
+#ifdef ZZ_RC522_MODULE
+#include &quot;zz_rc522_config.h&quot;
+
+tZZ_RC522_INFO_STRUCT tzz_rc522_info = {0};
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart</div>
         </div>
       </a>
 
