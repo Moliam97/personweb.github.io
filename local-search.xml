@@ -4,6 +4,57 @@
   
   
   <entry>
+    <title>rc522扇区读写测试记录</title>
+    <link href="undefined2019/11/06/rc522%E6%89%87%E5%8C%BA%E8%AF%BB%E5%86%99%E6%B5%8B%E8%AF%95%E8%AE%B0%E5%BD%95/"/>
+    <url>2019/11/06/rc522%E6%89%87%E5%8C%BA%E8%AF%BB%E5%86%99%E6%B5%8B%E8%AF%95%E8%AE%B0%E5%BD%95/</url>
+    
+    <content type="html"><![CDATA[<h1 id="存器控制测试"><a href="#存器控制测试" class="headerlink" title="存器控制测试"></a>存器控制测试</h1><p>1，将空白卡的第1扇区存取控制改为FF,07,50,45 ，</p><p>现象：校验密码成功，但是不可读数据</p><p>结论：存取控制前4位控制必须与后四位控制严格一致，否则导致扇区作废。</p><p>2，将空白卡的第4扇区存取控制改为EE,17,81,69，</p><p>现象：读取写入第0块数据正常</p><p>结论：110可以正常读写</p><h1 id="读取密码测试"><a href="#读取密码测试" class="headerlink" title="读取密码测试"></a>读取密码测试</h1><p>1，读取空白卡第0扇区数据，使用密码ff,ff,ff,ff,ff,ff验证A，B密码读取数据</p><p>现象：数据为0,0,0,0,0,0,ff,07,80,69,ff,ff,ff,ff,ff,ff</p><p>结论：密码A不可被读取，但是可以正常使用，默认A,B密码为ff,ff,ff,ff,ff,ff</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>rc522</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>rc522学习笔记</title>
+    <link href="undefined2019/11/02/rc522%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    <url>2019/11/02/rc522%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    
+    <content type="html"><![CDATA[<h1 id="IC卡和ID卡"><a href="#IC卡和ID卡" class="headerlink" title="IC卡和ID卡"></a>IC卡和ID卡</h1><p><a href="http://www.jhreader.com/wenzhang/wenzhang_021.asp" target="_blank" rel="noopener">IC与ID卡</a> </p><p>本次调试采用S50卡片，为4K存储M1的IC卡。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>RFID</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>uboot学习笔记</title>
+    <link href="undefined2019/10/31/uboot%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    <url>2019/10/31/uboot%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>hello-world</title>
     <link href="undefined2019/10/30/hello-world/"/>
     <url>2019/10/30/hello-world/</url>

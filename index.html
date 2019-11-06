@@ -139,6 +139,102 @@
     
     
     <div class="col-12 col-md-8 m-auto">
+      <a href="/2019/11/06/rc522%E6%89%87%E5%8C%BA%E8%AF%BB%E5%86%99%E6%B5%8B%E8%AF%95%E8%AE%B0%E5%BD%95/">
+        <p class="h4 index-header">rc522扇区读写测试记录</p>
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">存器控制测试1，将空白卡的第1扇区存取控制改为FF,07,50,45 ，
+现象：校验密码成功，但是不可读数据
+结论：存取控制前4位控制必须与后四位控制严格一致，否则导致扇区作废。
+2，将空白卡的第4扇区存取控制改为EE,17,81,69，
+现象：读取写入第0块数据正常
+结论：110可以正常读写
+读取密码测试1，读取空白卡第0扇区数据，使用密码ff,ff,ff,ff,ff,ff验证A，B密码读取数据
+现象：数据为0,0,0,0,0,0,ff,07,80,69,ff,ff,ff,ff,ff,ff
+结论：密码A不可被读取，但是可以正常使用，默认A,B密码为ff,ff,ff,ff,ff,ff
+</div>
+        </div>
+      </a>
+
+      <div>
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-11-06&nbsp;&nbsp;
+        
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/rc522">rc522</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4 mx-auto">
+    
+    
+    <div class="col-12 col-md-8 m-auto">
+      <a href="/2019/11/02/rc522%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        <p class="h4 index-header">rc522学习笔记</p>
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">IC卡和ID卡IC与ID卡 
+本次调试采用S50卡片，为4K存储M1的IC卡。
+</div>
+        </div>
+      </a>
+
+      <div>
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-11-02&nbsp;&nbsp;
+        
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/RFID">RFID</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4 mx-auto">
+    
+    
+    <div class="col-12 col-md-8 m-auto">
+      <a href="/2019/10/31/uboot%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+        <p class="h4 index-header">uboot学习笔记</p>
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1"></div>
+        </div>
+      </a>
+
+      <div>
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-10-31&nbsp;&nbsp;
+        
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4 mx-auto">
+    
+    
+    <div class="col-12 col-md-8 m-auto">
       <a href="/2019/10/30/hello-world/">
         <p class="h4 index-header">hello-world</p>
         
