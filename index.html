@@ -139,6 +139,40 @@
     
     
     <div class="col-12 col-md-8 m-auto">
+      <a href="/2019/11/14/%E6%99%BA%E8%83%BD%E9%94%81%E9%A9%B1%E5%8A%A8%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/">
+        <p class="h4 index-header">智能锁驱动遇到的问题总结</p>
+        
+        
+          
+        
+        <div class="index-excerpt" >
+          <div class="index-text mb-1">FLASH问题安全写函数中的擦除函数传参有问题，应为实际地址，传参为页数，另外：FLASH读写遇到问题，一定要检查是否擦除！！！ 一定要检查是否擦除！！！ 一定要检查是否擦除！！！
+Mylist的使用问题使用list前，必须要先初始化链表头，而且结构体中需要包含链表头。
+rj45插口问题使用rj45时，需要将PA8引脚频率设置为最高。不然会失败。rj45输出频率需要达到50M，注意RCC时钟配置
+m26电压问题m26标准电压为3.4~4.3v可供电为4v，但是不可使用stm32标准的3.3v，不然会一直出现低电压警告
+</div>
+        </div>
+      </a>
+
+      <div>
+        
+          <i class="iconfont icon-riqi2"></i>&nbsp;2019-11-14&nbsp;&nbsp;
+        
+        
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/smart%20lock">smart lock</a>&nbsp;
+          
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4 mx-auto">
+    
+    
+    <div class="col-12 col-md-8 m-auto">
       <a href="/2019/11/06/rc522%E6%89%87%E5%8C%BA%E8%AF%BB%E5%86%99%E6%B5%8B%E8%AF%95%E8%AE%B0%E5%BD%95/">
         <p class="h4 index-header">rc522扇区读写测试记录</p>
         
@@ -169,7 +203,7 @@
         
           <i class="iconfont icon-tag"></i>
           
-            <a href="/tags/rc522">rc522</a>&nbsp;
+            <a href="/tags/smart%20lock,rc522">smart lock,rc522</a>&nbsp;
           
         
       </div>
@@ -188,10 +222,11 @@
         
         <div class="index-excerpt" >
           <div class="index-text mb-1">IC卡和ID卡IC与ID卡的概念IC与ID卡 
-本次调试采用S50卡片，为4K存储M1的IC卡。
+本次调试采用S50卡片，为1K存储M1的IC卡。
 IC卡的读写控制链接1
 链接2
-RF522RF522为恩智浦退出的一款芯片，能够与IC卡进行无线通讯，读取数据，写入数据的芯片，本次使用波特率为9600的串口与RF522进行通讯，对卡片进行配置，读写。
+链接3（最全）
+RF522RF522为恩智浦出的一款芯片，能够与IC卡进行无线通讯，读取数据，写入数据的芯片，本次使用波特率为9600的串口与RF522进行通讯，对卡片进行配置，读写。
 休眠：当RC522配置卡片进入休眠状态时，IC卡若一直在附近，则会一直处于休眠状态，当离开时在接近时就不属于休眠状态了。RC522可以配置卡片为休眠状态，RC522寻找附近卡片时，可以选择是否查找处于休眠状态下的卡片。这样就可以实现卡片的防冲撞。
 RC522实验代码如下#include &quot;zz_include.h&quot;
 
@@ -202,7 +237,7 @@ tZZ_RC522_INFO_STRUCT tzz_rc522_info = {0};
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (huart</div>
+    if</div>
         </div>
       </a>
 
@@ -214,7 +249,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         
           <i class="iconfont icon-tag"></i>
           
-            <a href="/tags/RFID">RFID</a>&nbsp;
+            <a href="/tags/smart%20lock,RFID">smart lock,RFID</a>&nbsp;
           
         
       </div>
@@ -232,7 +267,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           
         
         <div class="index-excerpt" >
-          <div class="index-text mb-1"></div>
+          <div class="index-text mb-1">介绍嵌入式系统启动流程上电-&gt;bootloader（引导内核）-&gt;linux 内核-&gt;挂载根文件系统-&gt;应用程序
+</div>
         </div>
       </a>
 
@@ -241,6 +277,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           <i class="iconfont icon-riqi2"></i>&nbsp;2019-10-31&nbsp;&nbsp;
         
         
+        
+          <i class="iconfont icon-tag"></i>
+          
+            <a href="/tags/uboot,linux%20driver">uboot,linux driver</a>&nbsp;
+          
         
       </div>
     </div>

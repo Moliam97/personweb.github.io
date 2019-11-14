@@ -15,7 +15,7 @@
   <meta name="description" content="Moliam&#39;s blog">
   <meta name="author" content="Moliam">
   <meta name="keywords" content="">
-  <title>归档 ~ Moliam&#39;s blog</title>
+  <title>智能锁驱动遇到的问题总结 ~ Moliam&#39;s blog</title>
   <link rel="stylesheet" href="/lib/font-awesome/css/all.min.css"  >
   <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css"  >
   <link rel="stylesheet" href="/lib/mdbootstrap/css/mdb.min.css"  >
@@ -112,6 +112,9 @@
             </span>
 
             
+              <br>
+              <p class="mt-3">星期四, 十一月 14日 2019, 2:03 下午</p>
+            
           </div>
 
           
@@ -126,47 +129,64 @@
 
   <main>
     
-      <div class="container nopadding-md">
-        <div class="py-5 z-depth-3" id="board">
-          
-          <div class="container">
-            <div class="row">
-              <div class="col-12 col-md-10 m-auto">
-                
-
-<div class="list-group">
-  <p class="h4">共计 5 篇文章</p>
-  <hr>
-  
-    
       
-      <p class="h5">2019</p>
-    
-    <a href="/2019/11/14/%E6%99%BA%E8%83%BD%E9%94%81%E9%A9%B1%E5%8A%A8%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">智能锁驱动遇到的问题总结</span>
-      <span style="float: right;">11-14</span>
-    </a>
-  
-    
-    <a href="/2019/11/06/rc522%E6%89%87%E5%8C%BA%E8%AF%BB%E5%86%99%E6%B5%8B%E8%AF%95%E8%AE%B0%E5%BD%95/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">rc522扇区读写测试记录</span>
-      <span style="float: right;">11-06</span>
-    </a>
-  
-    
-    <a href="/2019/11/02/rc522%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">rc522学习笔记</span>
-      <span style="float: right;">11-02</span>
-    </a>
-  
-</div>
 
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="py-5 z-depth-3" id="board">
+        <div class="post-content mx-auto">
+          <div class="markdown-body">
+            <h1 id="FLASH问题"><a href="#FLASH问题" class="headerlink" title="FLASH问题"></a>FLASH问题</h1><p>安全写函数中的擦除函数传参有问题，应为实际地址，传参为页数，另外：FLASH读写遇到问题，<strong>一定要检查是否擦除！！！</strong> <strong>一定要检查是否擦除！！！</strong> <strong>一定要检查是否擦除！！！</strong></p>
+<h1 id="Mylist的使用问题"><a href="#Mylist的使用问题" class="headerlink" title="Mylist的使用问题"></a>Mylist的使用问题</h1><p>使用list前，必须要先初始化链表头，而且结构体中需要包含链表头。</p>
+<h1 id="rj45插口问题"><a href="#rj45插口问题" class="headerlink" title="rj45插口问题"></a>rj45插口问题</h1><p>使用rj45时，需要将PA8引脚频率设置为最高。不然会失败。rj45输出频率需要达到50M，注意RCC时钟配置</p>
+<h1 id="m26电压问题"><a href="#m26电压问题" class="headerlink" title="m26电压问题"></a>m26电压问题</h1><p>m26标准电压为3.4~4.3v可供电为4v，但是不可使用stm32标准的3.3v，不然会一直出现低电压警告</p>
 
-              </div>
-            </div>
+            <hr>
+          </div>
+          <br>
+          <div>
+            
+            <p>
+              <i class="iconfont icon-tag"></i>
+              
+                <a class="hover-with-bg" href="/tags/smart%20lock">smart lock</a>
+              
+            </p>
+            
+              <p class="note note-warning"></p>
+            
           </div>
         </div>
       </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-2 toc-container">
+      
+  <div id="toc">
+    <p class="h4"><i class="far fa-list-alt"></i>&nbsp;目录</p>
+    <div id="tocbot"></div>
+  </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- custom -->
+
+
+<!-- Comments -->
+<div class="col-lg-7 mx-auto nopadding-md">
+  <div class="container comments mx-auto" id="comments">
+    
+      <br><br>
+      
+      
+
+    
+  </div>
+</div>
+
     
   </main>
 
@@ -224,6 +244,11 @@
   <script src="/js/lazyload.js" ></script>
 
 
+  
+    <script src="/lib/tocbot/tocbot.min.js" ></script>
+  
+  <script src="/js/post.js" ></script>
+
 
   <script src="/lib/prettify/prettify.min.js" ></script>
   <script>
@@ -239,7 +264,7 @@
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "归档&nbsp;",
+        "智能锁驱动遇到的问题总结&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 100,

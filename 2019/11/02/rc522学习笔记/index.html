@@ -139,10 +139,11 @@
         <div class="post-content mx-auto">
           <div class="markdown-body">
             <h1 id="IC卡和ID卡"><a href="#IC卡和ID卡" class="headerlink" title="IC卡和ID卡"></a>IC卡和ID卡</h1><h2 id="IC与ID卡的概念"><a href="#IC与ID卡的概念" class="headerlink" title="IC与ID卡的概念"></a>IC与ID卡的概念</h2><p><a href="http://www.jhreader.com/wenzhang/wenzhang_021.asp" target="_blank" rel="noopener">IC与ID卡</a> </p>
-<p>本次调试采用S50卡片，为4K存储M1的IC卡。</p>
+<p>本次调试采用S50卡片，为1K存储M1的IC卡。</p>
 <h2 id="IC卡的读写控制"><a href="#IC卡的读写控制" class="headerlink" title="IC卡的读写控制"></a>IC卡的读写控制</h2><p><a href="https://blog.csdn.net/lynnlbf/article/details/52587486" target="_blank" rel="noopener">链接1</a></p>
 <p><a href="https://blog.csdn.net/lynnlbf/article/details/52588795" target="_blank" rel="noopener">链接2</a></p>
-<h1 id="RF522"><a href="#RF522" class="headerlink" title="RF522"></a>RF522</h1><p>RF522为恩智浦退出的一款芯片，能够与IC卡进行无线通讯，读取数据，写入数据的芯片，本次使用波特率为9600的串口与RF522进行通讯，对卡片进行配置，读写。</p>
+<p><a href="http://rdc.hundsun.com/portal/article/642.html" target="_blank" rel="noopener">链接3（最全）</a></p>
+<h1 id="RF522"><a href="#RF522" class="headerlink" title="RF522"></a>RF522</h1><p>RF522为恩智浦出的一款芯片，能够与IC卡进行无线通讯，读取数据，写入数据的芯片，本次使用波特率为9600的串口与RF522进行通讯，对卡片进行配置，读写。</p>
 <h2 id="休眠："><a href="#休眠：" class="headerlink" title="休眠："></a>休眠：</h2><p>当RC522配置卡片进入休眠状态时，IC卡若一直在附近，则会一直处于休眠状态，当离开时在接近时就不属于休眠状态了。RC522可以配置卡片为休眠状态，RC522寻找附近卡片时，可以选择是否查找处于休眠状态下的卡片。这样就可以实现卡片的防冲撞。</p>
 <h2 id="RC522实验代码如下"><a href="#RC522实验代码如下" class="headerlink" title="RC522实验代码如下"></a>RC522实验代码如下</h2><pre><code class="c">#include &quot;zz_include.h&quot;
 
@@ -760,7 +761,7 @@ INT8S s8ZZ_RC522_Module_Init(void)
             <p>
               <i class="iconfont icon-tag"></i>
               
-                <a class="hover-with-bg" href="/tags/RFID">RFID</a>
+                <a class="hover-with-bg" href="/tags/smart%20lock,RFID">smart lock,RFID</a>
               
             </p>
             
