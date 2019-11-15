@@ -33,7 +33,9 @@
     
     <tags>
       
-      <tag>smart lock,rc522</tag>
+      <tag>smart lock</tag>
+      
+      <tag>RC522</tag>
       
     </tags>
     
@@ -52,7 +54,9 @@
     
     <tags>
       
-      <tag>smart lock,RFID</tag>
+      <tag>smart lock</tag>
+      
+      <tag>RFID</tag>
       
     </tags>
     
